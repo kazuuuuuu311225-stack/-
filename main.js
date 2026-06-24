@@ -306,6 +306,88 @@ const MISSIONS = [
       },
     ],
   },
+  {
+    missionNumber: 4,
+    missionLabel: '3-α',
+    chapter: '力の図示（ベクトル）',
+    questions: [
+      {
+        type: 'meaning',
+        question: '自由落下している物体に働く力はどれか',
+        choices: ['重力のみ（下向き）', '上向きの力', '前向きの力', '力は働かない'],
+        answer: 0,
+        explanation: '空気抵抗を無視すれば重力のみ',
+      },
+      {
+        type: 'meaning',
+        question: '机の上で静止している物体に働く力はどれか',
+        choices: ['重力のみ', '垂直抗力のみ', '重力と垂直抗力', '力は働かない'],
+        answer: 2,
+        explanation: '重力と垂直抗力がつり合う',
+      },
+      {
+        type: 'meaning',
+        question: 'ひもで吊るされた物体に働く力はどれか',
+        choices: ['重力のみ', '張力のみ', '重力と張力', '力はない'],
+        answer: 2,
+        explanation: '下に重力、上に張力',
+      },
+      {
+        type: 'meaning',
+        question: 'ばねにつながれた物体に働く力はどれか',
+        choices: ['重力のみ', '弾性力のみ', '重力と弾性力', '速度'],
+        answer: 2,
+        explanation: 'ばねは弾性力を持つ',
+      },
+      {
+        type: 'meaning',
+        question: '斜面上で静止している物体に働く力はどれか',
+        choices: ['重力のみ', '重力と垂直抗力', '重力・垂直抗力・摩擦力', '力はない'],
+        answer: 2,
+        explanation: '滑らない場合は摩擦も働く',
+      },
+      {
+        type: 'meaning',
+        question: '張力の向きはどれか',
+        choices: ['常に下向き', '常に上向き', 'ひもの方向に沿って引く向き', 'ランダム'],
+        answer: 2,
+        explanation: 'ひもに沿って引く',
+      },
+      {
+        type: 'meaning',
+        question: '垂直抗力の向きはどれか',
+        choices: ['斜面に平行', '面に垂直', '下向き', '速度方向'],
+        answer: 1,
+        explanation: '面に垂直に働く',
+      },
+      {
+        type: 'meaning',
+        question: '弾性力の向きはどれか',
+        choices: ['伸びる方向', '縮む方向と逆（元に戻る方向）', '下向き', '上向き'],
+        answer: 1,
+        explanation: '元に戻ろうとする力',
+      },
+      {
+        type: 'meaning',
+        question: '動いている物体に働く空気抵抗の向きはどれか',
+        choices: ['運動方向と同じ', '運動方向と逆', '上向きのみ', '下向きのみ'],
+        answer: 1,
+        explanation: '逆向きに働く',
+      },
+      {
+        type: 'meaning',
+        question: '力の図を描くときの正しいルールはどれか',
+        choices: [
+          'すべての力を1点から矢印で描く',
+          '大きさは無視する',
+          '1つの力だけ描く',
+          '方向は適当でよい',
+        ],
+        answer: 0,
+        explanation: '作用点からベクトルで描く',
+      },
+    ],
+  },
 ];
 
 const SCREENS = { HOME: 'home', MODE: 'mode', QUIZ: 'quiz', RESULT: 'result', SCORE: 'score' };
@@ -331,8 +413,27 @@ const state = {
 const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 const app = document.getElementById('app');
 
-function getStorageKey(missionNumber) {
-  return 'physics-mission-' + missionNumber + '-wrong-ids';
+function displayMissionId(m) {
+  return m.missionLabel || String(m.missionNumber);
+}
+
+function getStorageKey(m) {
+  return 'physics-mission-' + displayMissionId(m) + '-wrong-ids';
+}
+
+function loadWrongIds(m) {
+  try {
+    const raw = localStorage.getItem(getStorageKey(m));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveWrongIds(m, ids) {
+  localStorage.setItem(getStorageKey(m), JSON.stringify(ids));
 }
 
 function shuffleArray(items) {
@@ -344,21 +445,6 @@ function shuffleArray(items) {
     arr[j] = tmp;
   }
   return arr;
-}
-
-function loadWrongIds(missionNumber) {
-  try {
-    const raw = localStorage.getItem(getStorageKey(missionNumber));
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (e) {
-    return [];
-  }
-}
-
-function saveWrongIds(missionNumber, ids) {
-  localStorage.setItem(getStorageKey(missionNumber), JSON.stringify(ids));
 }
 
 function getRankMessage(score, total) {
@@ -413,7 +499,7 @@ function menuItems() {
 function selectMission(index) {
   state.missionIndex = index;
   state.menuSelection = 0;
-  state.storedWrongIds = loadWrongIds(MISSIONS[index].missionNumber);
+  state.storedWrongIds = loadWrongIds(MISSIONS[index]);
   state.screen = SCREENS.MODE;
   render();
 }
@@ -456,7 +542,7 @@ function handleNext() {
       else wrongSet.add(numId);
     });
     state.storedWrongIds = Array.from(wrongSet);
-    saveWrongIds(mission.missionNumber, state.storedWrongIds);
+    saveWrongIds(mission, state.storedWrongIds);
     state.screen = SCREENS.SCORE;
     render();
     return;
@@ -476,7 +562,7 @@ function renderHome() {
   MISSIONS.forEach(function (m, index) {
     var sel = state.missionSelection === index ? ' selected' : '';
     html += '<li class="menu-item mission-item' + sel + '" data-index="' + index + '">';
-    html += '<span class="mission-number"><span class="mission-arrow">▶</span> MISSION ' + m.missionNumber + '</span>';
+    html += '<span class="mission-number"><span class="mission-arrow">▶</span> MISSION ' + displayMissionId(m) + '</span>';
     html += '<span class="mission-name">（' + escapeHtml(m.chapter) + '）</span>';
     html += '<span class="mission-meta">' + m.questions.length + ' 問</span></li>';
   });
@@ -506,7 +592,7 @@ function renderMode() {
   ];
   var html = '<section class="screen fade-in"><div class="glass-card">';
   html += '<button type="button" class="btn-back-link" id="btnBackHome">← ミッション選択へ</button>';
-  html += '<p class="badge">MISSION ' + m.missionNumber + ' · PHYSICS MISSION</p>';
+  html += '<p class="badge">MISSION ' + displayMissionId(m) + ' · PHYSICS MISSION</p>';
   html += '<h1 class="app-title">' + escapeHtml(m.chapter) + '</h1>';
   html += '<p class="app-subtitle">全 ' + m.questions.length + ' 問 · 4択クイズ</p>';
   html += '<ul class="menu-list">';
@@ -538,7 +624,7 @@ function renderQuiz() {
   html += '<span class="type-badge">' + (TYPE_LABELS[q.type] || q.type) + '</span>';
   html += '<span class="progress-text">' + current + ' / ' + total + '</span></div>';
   html += '<div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div>';
-  html += '<p class="mission-label">MISSION ' + m.missionNumber + ' · ' + escapeHtml(m.chapter) + '</p>';
+  html += '<p class="mission-label">MISSION ' + displayMissionId(m) + ' · ' + escapeHtml(m.chapter) + '</p>';
   html += '<p class="question-text">' + escapeHtml(q.question) + '</p>';
   html += '<ul class="choices-list">';
   q.choices.forEach(function (choice, index) {
@@ -601,7 +687,7 @@ function renderScore() {
   var wrong = sessionWrongCount();
   var html = '<section class="screen fade-in"><div class="glass-card card-score">';
   html += '<p class="badge">MISSION COMPLETE</p>';
-  html += '<h2 class="score-title">MISSION ' + m.missionNumber + ' · ' + escapeHtml(m.chapter) + '</h2>';
+  html += '<h2 class="score-title">MISSION ' + displayMissionId(m) + ' · ' + escapeHtml(m.chapter) + '</h2>';
   html += '<div class="score-circle"><span class="score-value">' + state.score + '</span>';
   html += '<span class="score-total">/ ' + state.questions.length + '</span></div>';
   html += '<p class="score-rank">' + getRankMessage(state.score, state.questions.length) + '</p>';
@@ -705,7 +791,7 @@ function bindEvents() {
     var btnBackMode = document.getElementById('btnBackMode');
     if (btnBackMode)
       btnBackMode.addEventListener('click', function () {
-        state.storedWrongIds = loadWrongIds(missionData().missionNumber);
+        state.storedWrongIds = loadWrongIds(missionData());
         state.menuSelection = 0;
         state.screen = SCREENS.MODE;
         render();
