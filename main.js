@@ -1635,6 +1635,96 @@ const state = {
 
 const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 const app = document.getElementById('app');
+const soundToggleBtn = document.getElementById('btnSoundToggle');
+
+var audioCtx = null;
+var soundEnabled = true;
+
+function loadSoundPref() {
+  try {
+    if (localStorage.getItem('physics-mission-sound') === 'off') soundEnabled = false;
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+function saveSoundPref() {
+  try {
+    localStorage.setItem('physics-mission-sound', soundEnabled ? 'on' : 'off');
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+function updateSoundToggle() {
+  if (!soundToggleBtn) return;
+  soundToggleBtn.textContent = soundEnabled ? '🔊' : '🔇';
+  soundToggleBtn.classList.toggle('muted', !soundEnabled);
+  soundToggleBtn.setAttribute('aria-pressed', soundEnabled ? 'true' : 'false');
+}
+
+function initAudio() {
+  if (audioCtx) return audioCtx;
+  var AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return null;
+  audioCtx = new AudioContext();
+  return audioCtx;
+}
+
+function resumeAudio() {
+  var ctx = initAudio();
+  if (ctx && ctx.state === 'suspended') ctx.resume();
+  return ctx;
+}
+
+function playTone(freq, duration, type, volume, startAt) {
+  var ctx = resumeAudio();
+  if (!ctx || !soundEnabled) return;
+  var t = startAt != null ? startAt : ctx.currentTime;
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.setValueAtTime(freq, t);
+  gain.gain.setValueAtTime(volume || 0.08, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(t);
+  osc.stop(t + duration + 0.05);
+}
+
+function playSound(name) {
+  if (!soundEnabled) return;
+  var ctx = resumeAudio();
+  if (!ctx) return;
+  var t = ctx.currentTime;
+  if (name === 'tap') {
+    playTone(880, 0.06, 'sine', 0.06, t);
+  } else if (name === 'select') {
+    playTone(660, 0.05, 'sine', 0.05, t);
+  } else if (name === 'correct') {
+    playTone(523.25, 0.12, 'sine', 0.08, t);
+    playTone(659.25, 0.12, 'sine', 0.08, t + 0.1);
+    playTone(783.99, 0.18, 'sine', 0.08, t + 0.2);
+  } else if (name === 'incorrect') {
+    playTone(220, 0.15, 'triangle', 0.07, t);
+    playTone(196, 0.2, 'triangle', 0.06, t + 0.12);
+  } else if (name === 'complete') {
+    playTone(523.25, 0.1, 'sine', 0.07, t);
+    playTone(659.25, 0.1, 'sine', 0.07, t + 0.1);
+    playTone(783.99, 0.1, 'sine', 0.07, t + 0.2);
+    playTone(1046.5, 0.25, 'sine', 0.08, t + 0.3);
+  } else if (name === 'next') {
+    playTone(740, 0.05, 'sine', 0.05, t);
+  }
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  saveSoundPref();
+  updateSoundToggle();
+  if (soundEnabled) playSound('tap');
+}
 
 function displayMissionId(m) {
   return m.missionLabel || String(m.missionNumber);
@@ -1754,6 +1844,7 @@ function menuItems() {
 }
 
 function selectMission(index) {
+  playSound('tap');
   state.missionIndex = index;
   state.menuSelection = 0;
   state.storedWrongIds = loadWrongIds(MISSIONS[index]);
@@ -1762,6 +1853,7 @@ function selectMission(index) {
 }
 
 function startQuiz(selectedMode) {
+  playSound('tap');
   const mission = missionData();
   const activeMode = selectedMode || state.mode;
   const list = buildQuestionList(mission.questions, activeMode, state.storedWrongIds);
@@ -1785,6 +1877,7 @@ function handleAnswer(index) {
   state.lastAnswer = index;
   if (isCorrect) state.score += 1;
   state.sessionResults[q.id] = isCorrect;
+  playSound(isCorrect ? 'correct' : 'incorrect');
   state.screen = SCREENS.RESULT;
   render();
 }
@@ -1801,6 +1894,7 @@ function handleNext() {
     });
     state.storedWrongIds = Array.from(wrongSet);
     saveWrongIds(mission, state.storedWrongIds);
+    playSound('complete');
     state.screen = SCREENS.SCORE;
     render();
     return;
@@ -1808,6 +1902,7 @@ function handleNext() {
   state.currentIndex += 1;
   state.selectedIndex = 0;
   applyShuffledChoices(state.currentIndex);
+  playSound('next');
   state.screen = SCREENS.QUIZ;
   render();
 }
@@ -2005,6 +2100,7 @@ function bindEvents() {
       el.addEventListener('click', function () {
         if (el.classList.contains('disabled')) return;
         state.menuSelection = Number(el.getAttribute('data-menu'));
+        playSound('select');
         render();
       });
     });
@@ -2025,6 +2121,7 @@ function bindEvents() {
         else if (state.selectedIndex === index) handleAnswer(index);
         else {
           state.selectedIndex = index;
+          playSound('select');
           render();
         }
       });
@@ -2073,9 +2170,11 @@ function handleKeydown(event) {
   if (state.screen === SCREENS.HOME) {
     if (event.key === 'ArrowUp') {
       state.missionSelection = (state.missionSelection - 1 + MISSIONS.length) % MISSIONS.length;
+      playSound('select');
       render();
     } else if (event.key === 'ArrowDown') {
       state.missionSelection = (state.missionSelection + 1) % MISSIONS.length;
+      playSound('select');
       render();
     } else if (event.key === 'Enter') {
       selectMission(state.missionSelection);
@@ -2096,6 +2195,7 @@ function handleKeydown(event) {
         nextUp = (nextUp - 1 + items.length) % items.length;
       } while (items[nextUp].disabled && nextUp !== state.menuSelection);
       state.menuSelection = nextUp;
+      playSound('select');
       render();
     } else if (event.key === 'ArrowDown') {
       var nextDown = state.menuSelection;
@@ -2103,6 +2203,7 @@ function handleKeydown(event) {
         nextDown = (nextDown + 1) % items.length;
       } while (items[nextDown].disabled && nextDown !== state.menuSelection);
       state.menuSelection = nextDown;
+      playSound('select');
       render();
     } else if (event.key === 'Enter') {
       if (!items[state.menuSelection].disabled) {
@@ -2118,9 +2219,11 @@ function handleKeydown(event) {
     var count = q.choices.length;
     if (event.key === 'ArrowUp') {
       state.selectedIndex = (state.selectedIndex - 1 + count) % count;
+      playSound('select');
       render();
     } else if (event.key === 'ArrowDown') {
       state.selectedIndex = (state.selectedIndex + 1) % count;
+      playSound('select');
       render();
     } else if (event.key === 'Enter') {
       handleAnswer(state.selectedIndex);
@@ -2132,6 +2235,12 @@ function handleKeydown(event) {
     handleNext();
   }
 }
+
+if (soundToggleBtn) {
+  soundToggleBtn.addEventListener('click', toggleSound);
+}
+loadSoundPref();
+updateSoundToggle();
 
 document.addEventListener('keydown', handleKeydown);
 render();
