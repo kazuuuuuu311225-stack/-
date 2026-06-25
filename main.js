@@ -1670,6 +1670,36 @@ function shuffleArray(items) {
   return arr;
 }
 
+function shuffleChoices(q) {
+  const indices = q.choices.map(function (_, i) {
+    return i;
+  });
+  const order = shuffleArray(indices);
+  return {
+    choices: order.map(function (i) {
+      return q.choices[i];
+    }),
+    answer: order.indexOf(q.answer),
+  };
+}
+
+function withStoredChoices(q) {
+  return Object.assign({}, q, {
+    _originalChoices: q.choices.slice(),
+    _originalAnswer: q.answer,
+  });
+}
+
+function applyShuffledChoices(index) {
+  const q = state.questions[index];
+  if (!q || !q._originalChoices) return;
+  const shuffled = shuffleChoices({
+    choices: q._originalChoices,
+    answer: q._originalAnswer,
+  });
+  state.questions[index] = Object.assign({}, q, shuffled);
+}
+
 function getRankMessage(score, total) {
   const ratio = score / total;
   if (ratio === 1) return '★ ミッションクリア！ ★';
@@ -1695,14 +1725,18 @@ function buildQuestionList(allQuestions, mode, wrongIds) {
   const withIds = allQuestions.map(function (q, index) {
     return Object.assign({}, q, { id: index });
   });
+  let list;
   if (mode === MODES.REVIEW) {
     const wrongSet = new Set(wrongIds);
-    return withIds.filter(function (q) {
+    list = withIds.filter(function (q) {
       return wrongSet.has(q.id);
     });
+  } else if (mode === MODES.RANDOM) {
+    list = shuffleArray(withIds);
+  } else {
+    list = withIds;
   }
-  if (mode === MODES.RANDOM) return shuffleArray(withIds);
-  return withIds;
+  return list.map(withStoredChoices);
 }
 
 function sessionWrongCount() {
@@ -1736,6 +1770,7 @@ function startQuiz(selectedMode) {
   state.questions = list;
   state.currentIndex = 0;
   state.selectedIndex = 0;
+  applyShuffledChoices(0);
   state.score = 0;
   state.lastAnswer = null;
   state.sessionResults = {};
@@ -1772,6 +1807,7 @@ function handleNext() {
   }
   state.currentIndex += 1;
   state.selectedIndex = 0;
+  applyShuffledChoices(state.currentIndex);
   state.screen = SCREENS.QUIZ;
   render();
 }
