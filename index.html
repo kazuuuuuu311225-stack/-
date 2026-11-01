@@ -2,24 +2,1389 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>PHYSICS MISSION — 物理基礎クイズ</title>
+  <title>物理基礎 波の基本 — はじめの導入</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+/**
+ * physLabo — 2D シミュレーション共通シェル
+ * 各 sim は :root で --accent 等を上書き。body の background は sim 側で任意指定。
+ */
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  --accent: #38bdf8;
+  --accent-light: #7dd3fc;
+  --panel: rgba(12, 18, 32, 0.82);
+  --border: rgba(56, 189, 248, 0.22);
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --back-text: #e0f2fe;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  background: linear-gradient(165deg, #050810 0%, #0c1524 45%, #0a1220 100%);
+  color: var(--text);
+  min-height: 100dvh;
+  padding: max(10px, env(safe-area-inset-top)) 0 max(24px, env(safe-area-inset-bottom));
+}
+
+.page-shell {
+  width: min(980px, 96vw);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.page-header { text-align: center; }
+
+.hero-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 25%, transparent), color-mix(in srgb, var(--accent-light) 20%, transparent));
+  border: 1px solid color-mix(in srgb, var(--accent-light) 35%, transparent);
+  font-size: 1.3rem;
+}
+
+h2 {
+  margin: 6px 0 4px;
+  font-weight: 600;
+  color: var(--accent-light);
+}
+
+.chapter-label {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+#back {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 9px 16px;
+  color: var(--back-text);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-light) 38%, transparent);
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+section.panel,
+.panel {
+  border-radius: 14px;
+  padding: 16px 18px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+section.panel h3,
+.panel h3 {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+  color: var(--accent-light);
+}
+
+section.panel p,
+.panel p {
+  font-size: 0.88rem;
+  line-height: 1.75;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.formula-box {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  font-size: 0.88rem;
+  color: color-mix(in srgb, var(--accent-light) 85%, white);
+  text-align: center;
+  line-height: 1.65;
+}
+
+.formula-live {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  font-size: 0.86rem;
+  color: #fde68a;
+  line-height: 1.65;
+  text-align: center;
+}
+
+.canvas-wrap {
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 10px;
+  background: #020617;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.canvas-wrap canvas {
+  display: block;
+  width: 100%;
+  height: min(640px, 68dvh);
+  min-height: 440px;
+  touch-action: none;
+}
+
+.param-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+@media (min-width: 640px) {
+  .param-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+label {
+  display: block;
+  font-size: 0.84rem;
+  color: #cbd5e1;
+  margin-bottom: 4px;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.slider-val {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--accent-light) 90%, white);
+  font-variant-numeric: tabular-nums;
+}
+
+.toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.toggle-btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  background: rgba(15, 30, 45, 0.6);
+  color: #cbd5e1;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle-btn.is-active {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  color: #e0e7ff;
+}
+
+.toggle-btn.is-charge.is-active {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.55);
+  color: #bbf7d0;
+}
+
+.toggle-btn.is-discharge.is-active {
+  background: rgba(248, 113, 113, 0.18);
+  border-color: rgba(248, 113, 113, 0.5);
+  color: #fecaca;
+}
+
+.cap-row.is-hidden { display: none; }
+
+.readout-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+@media (min-width: 640px) {
+  .readout-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.readout {
+  padding: 10px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.readout dt {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.readout dd {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #eef2ff;
+}
+
+.legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-top: 8px;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+.hint {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* 数式表示エイリアス（旧クラス名との互換） */
+.formula-top,
+.eqn-panel {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  text-align: center;
+}
+
+.formula-main,
+.eqn-main {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fde68a;
+  line-height: 1.65;
+  text-align: center;
+}
+
+.formula-sub,
+.eqn-sub {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 6px;
+  text-align: center;
+}
+
+/* prefers-reduced-motion（装飾アニメのみ抑制） */
+.physlabo-reduced-motion .hero-icon,
+.physlabo-reduced-motion .node-fx {
+  animation: none !important;
+}
+
+
+    :root {
+      --accent: #38bdf8;
+      --accent-light: #7dd3fc;
+      --panel: rgba(12, 18, 32, 0.9);
+      --border: rgba(56, 189, 248, 0.28);
+      --back-text: #e0f2fe;
+    }
+    body {
+      background: linear-gradient(165deg, #050810 0%, #0c1524 45%, #0a1220 100%);
+    }
+    .page-shell { width: min(1080px, 96vw); }
+    [hidden] { display: none !important; }
+    .canvas-wrap canvas {
+      height: min(430px, 50dvh);
+      min-height: 320px;
+    }
+    .toggle-btn, .step-btn { min-height: 44px; touch-action: manipulation; }
+    input[type="range"] { min-height: 32px; touch-action: manipulation; }
+    .stepper { -webkit-overflow-scrolling: touch; }
+    .stepper {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      margin-bottom: 12px;
+    }
+    .step-btn {
+      appearance: none;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      border: 1px solid rgba(125, 211, 252, 0.32);
+      background: rgba(15, 23, 42, 0.55);
+      color: #cbd5e1;
+      font: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 8px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .step-btn.is-active {
+      background: rgba(56, 189, 248, 0.24);
+      color: #f8fafc;
+      border-color: rgba(186, 230, 253, 0.85);
+    }
+    .ask {
+      margin-top: 8px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.38);
+      color: #fde68a;
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.65;
+    }
+    .teacher { margin-top: 8px; }
+    .transport { margin-top: 10px; }
+    #btnNext.is-active,
+    #btnNext {
+      background: rgba(56, 189, 248, 0.28);
+      color: #f8fafc;
+      border-color: rgba(186, 230, 253, 0.7);
+    }
+    #btnNext:disabled { opacity: 0.45; }
+    .toggle-btn:disabled { opacity: 0.4; cursor: default; }
+    .readout dd { font-variant-numeric: tabular-nums; font-size: 0.95rem; }
+    .readout dd.hl { color: #fde68a; }
+    @media (min-width: 800px) {
+      #readoutGrid { grid-template-columns: repeat(5, 1fr); }
+    }
+  </style>
 </head>
-<body tabindex="0">
-  <div class="app-bg" aria-hidden="true">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
+<body>
+  <div class="page-shell">
+    <header class="page-header">
+      <div class="hero-icon" aria-hidden="true">〰</div>
+      <p class="chapter-label">物理基礎 · 波の最初の時間</p>
+      <h2>波の基本 — はじめの導入</h2>
+    </header>
+
+    <section class="panel">
+      <div class="stepper" id="stepper" role="tablist" aria-label="導入の場面"></div>
+      <h3 id="stepTitle">1. まず、見てみよう</h3>
+      <p class="ask" id="ask" aria-live="polite"></p>
+      <p class="teacher" id="teacher"></p>
+      <div class="toggle-row transport" id="transport">
+        <button type="button" class="toggle-btn is-active" id="btnPlay">一時停止</button>
+        <button type="button" class="toggle-btn" id="btnSlow">ゆっくり</button>
+        <button type="button" class="toggle-btn" id="btnFrame">コマ送り</button>
+        <button type="button" class="toggle-btn" id="btnReplay">もう一度</button>
+        <button type="button" class="toggle-btn" id="btnPrev">前の場面</button>
+        <button type="button" class="toggle-btn" id="btnNext">次へ</button>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="cv" aria-label="波の導入。ロープを伝わる形と、その場で振動する黄色い粒"></canvas>
+      </div>
+
+      <div class="param-grid" id="paramGrid">
+        <div id="ampBlock">
+          <label for="ampSlider">振幅 A <span class="slider-val" id="ampVal">4.0 cm</span></label>
+          <input id="ampSlider" type="range" min="1" max="6" step="0.5" value="4">
+        </div>
+        <div id="lamBlock">
+          <label for="lamSlider">波長 λ <span class="slider-val" id="lamVal">60 cm</span></label>
+          <input id="lamSlider" type="range" min="40" max="80" step="5" value="60">
+        </div>
+        <div id="freqBlock">
+          <label for="freqSlider">振動数 f <span class="slider-val" id="freqVal">0.50 Hz</span></label>
+          <input id="freqSlider" type="range" min="0.25" max="1.5" step="0.05" value="0.5">
+        </div>
+      </div>
+
+      <div class="toggle-row" id="typeRow">
+        <button type="button" class="toggle-btn is-active" id="btnTrans">横波（ロープ）</button>
+        <button type="button" class="toggle-btn" id="btnLong">縦波（ばね）</button>
+      </div>
+
+      <div class="readout-grid" id="readoutGrid">
+        <dl class="readout" id="cardA"><dt>振幅 A</dt><dd id="outA">4.0 cm</dd></dl>
+        <dl class="readout" id="cardL"><dt>波長 λ</dt><dd id="outL">60 cm</dd></dl>
+        <dl class="readout" id="cardT"><dt>周期 T</dt><dd id="outT">2.00 s</dd></dl>
+        <dl class="readout" id="cardF"><dt>振動数 f</dt><dd id="outF">0.50 Hz</dd></dl>
+        <dl class="readout" id="cardV"><dt>波の速さ v</dt><dd class="hl" id="outV">30 cm/s</dd></dl>
+      </div>
+      <div class="formula-live" id="formula"></div>
+      <p class="hint">上のボタンで再生と場面移動。指でスライダーを動かす。ロープ（ばね）の長さは 240 cm</p>
+    </section>
   </div>
-  <main class="app-container" id="app"></main>
-  <button type="button" class="sound-toggle" id="btnSoundToggle" aria-label="効果音のオン/オフ" title="効果音">🔊</button>
-  <script src="main.js"></script>
+
+  <script>
+  (function () {
+    "use strict";
+
+    var L = 240;
+    var AMP_FULL = 6;
+    var WATCH_X = 100;
+    var FONT = "'Noto Sans JP', Inter, sans-serif";
+
+    var STEPS = [
+      {
+        tab: "1 見る",
+        next: "粒の動き",
+        title: "1. まず、見てみよう",
+        ask: "左端をひと振りすると、形が右へ進む。黄色い粒も、右へ進むだろうか。",
+        note: "説明はまだしない。2回ほど見せて、隣と予想を話してから次へ進む。"
+      },
+      {
+        tab: "2 粒",
+        next: "山と振幅",
+        title: "2. 進むのは形。粒は振動する",
+        ask: "進むのは波の形。黄色い粒は、同じ場所で上下に振動する。",
+        note: "波を伝えるものを媒質という。ロープのひとつひとつの点が媒質で、振動が隣へ伝わる。"
+      },
+      {
+        tab: "3 振幅",
+        next: "波長",
+        title: "3. 山・谷・振幅",
+        ask: "振幅 A は、つり合いの位置から山（または谷）までの長さ。",
+        note: "振幅のスライダーで山の高さだけが変わる。山の間隔はこのあと、波長として見る。"
+      },
+      {
+        tab: "4 波長",
+        next: "周期",
+        title: "4. 波長",
+        ask: "波長 λ は、山から次の山までの距離。谷から次の谷までも同じ長さ。",
+        note: "波長を変えると山の間隔が変わる。振幅を変えても、波長はそのまま。"
+      },
+      {
+        tab: "5 周期",
+        next: "速さ",
+        title: "5. 周期と振動数",
+        ask: "周期 T は粒が 1 往復する時間。振動数 f は 1 秒間の往復回数で、f = 1/T。",
+        note: "下のグラフは黄色い粒だけを取り出したもの。横軸が時間、縦軸が変位。"
+      },
+      {
+        tab: "6 速さ",
+        next: "縦波",
+        title: "6. 波の速さ",
+        ask: "山は、周期 T のあいだに波長 λ だけ進む。速さは v = λ/T = f λ。",
+        note: "点線の印が T 秒前の山、実線の印が今の山。その間隔が λ。"
+      },
+      {
+        tab: "7 縦波",
+        next: "自由に操作",
+        title: "7. 縦波 — 密と疎",
+        ask: "縦波では、粒は進行方向に沿って前後に振動する。集まったところを密、まばらを疎という。",
+        note: "ばねの輪は左右に動く。下のグラフは、その前後のずれを上下に描き直したもの。密から次の密までが波長。"
+      },
+      {
+        tab: "8 操作",
+        next: "",
+        title: "8. 自分で確かめる",
+        ask: "振幅・波長・振動数を変えて、v = f λ が成り立つことを確認する。",
+        note: "横波と縦波を切り替える。粒の動く向きはちがう。速さの式は同じ。"
+      }
+    ];
+
+    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var state = {
+      step: 0,
+      playing: !reduced,
+      slow: false,
+      t: 0,
+      A: 4,
+      lambda: 60,
+      f: 0.5,
+      waveType: "trans",
+      lastTs: 0
+    };
+    var trail = [];
+    var cssW = 0;
+    var cssH = 0;
+    var uiSig = "";
+
+    var canvas = document.getElementById("cv");
+    var ctx = canvas.getContext("2d");
+    var stepperEl = document.getElementById("stepper");
+    var stepBtns = [];
+
+    STEPS.forEach(function (s, i) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "step-btn";
+      b.setAttribute("role", "tab");
+      b.textContent = s.tab;
+      b.addEventListener("click", function () { setStep(i); });
+      stepperEl.appendChild(b);
+      stepBtns.push(b);
+    });
+
+    function fmt(n, d) { return Number(n).toFixed(d); }
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+    function isLong() {
+      if (state.step === 6) return true;
+      return state.step === 7 && state.waveType === "long";
+    }
+    function isPulse() { return state.step === 0; }
+    function showGraph() {
+      return isLong() || state.step >= 4;
+    }
+
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function tag(x, y, text, fg, bg) {
+      ctx.font = "700 15px " + FONT;
+      var w = ctx.measureText(text).width + 16;
+      var h = 26;
+      var left = clamp(x - w / 2, 6, Math.max(6, cssW - w - 6));
+      var top = clamp(y, 4, Math.max(4, cssH - h - 4));
+      roundRect(left, top, w, h, 8);
+      ctx.fillStyle = bg;
+      ctx.fill();
+      ctx.fillStyle = fg;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, left + w / 2, top + h / 2 + 0.5);
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+    }
+
+    function dimH(x1, x2, y, text, color) {
+      if (Math.abs(x2 - x1) < 28) return;
+      var a = Math.min(x1, x2);
+      var b = Math.max(x1, x2);
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 1.75;
+      ctx.beginPath();
+      ctx.moveTo(a, y);
+      ctx.lineTo(b, y);
+      ctx.moveTo(a, y - 6);
+      ctx.lineTo(a, y + 6);
+      ctx.moveTo(b, y - 6);
+      ctx.lineTo(b, y + 6);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(a, y);
+      ctx.lineTo(a + 9, y - 4);
+      ctx.lineTo(a + 9, y + 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(b, y);
+      ctx.lineTo(b - 9, y - 4);
+      ctx.lineTo(b - 9, y + 4);
+      ctx.closePath();
+      ctx.fill();
+      tag((a + b) / 2, y - 30, text, "#0b1220", color);
+    }
+
+    function sineDisp(x, t) {
+      return state.A * Math.sin(2 * Math.PI * (state.f * t - x / state.lambda));
+    }
+
+    function pulseInfo(t) {
+      var cycle = 6.4;
+      var tc = t % cycle;
+      var speed = 52;
+      var xc = -28 + speed * tc;
+      return { tc: tc, xc: xc, active: tc < 5.3, cycle: cycle };
+    }
+
+    function disp(x, t) {
+      if (!isPulse()) return sineDisp(x, t);
+      var p = pulseInfo(t);
+      if (!p.active) return 0;
+      var z = (x - p.xc) / 22;
+      return state.A * Math.exp(-0.5 * z * z);
+    }
+
+    function xsFor(offset, t) {
+      var xs = [];
+      var n0 = Math.floor(state.f * t - offset - L / state.lambda) - 2;
+      var n1 = Math.ceil(state.f * t - offset) + 2;
+      for (var n = n0; n <= n1; n++) {
+        var x = state.lambda * (state.f * t - offset - n);
+        if (x >= -2 && x <= L + 2) xs.push(x);
+      }
+      xs.sort(function (a, b) { return a - b; });
+      return xs;
+    }
+
+    function nearest(xs, target) {
+      var best = xs.length ? xs[0] : target;
+      var bestD = 1e9;
+      for (var i = 0; i < xs.length; i++) {
+        var d = Math.abs(xs[i] - target);
+        if (d < bestD) { bestD = d; best = xs[i]; }
+      }
+      return best;
+    }
+
+    function layout() {
+      var graph = showGraph();
+      var graphH = graph ? Math.round(cssH * 0.36) : 0;
+      return {
+        padL: 78,
+        padR: 28,
+        waveTop: 34,
+        waveBot: cssH - graphH - 8,
+        graphTop: cssH - graphH,
+        graphH: graphH
+      };
+    }
+
+    function xToPx(x, lay) {
+      return lay.padL + (x / L) * (cssW - lay.padL - lay.padR);
+    }
+
+    function waveGeom(lay) {
+      var waveH = Math.max(80, lay.waveBot - lay.waveTop);
+      var reserve = 14;
+      if (state.step >= 3 || isLong()) reserve = 54;
+      var ampPx = Math.min(120, Math.max(52, (waveH - reserve - 52) * 0.46));
+      var block = 48 + ampPx * 2 + reserve;
+      var slack = Math.max(0, waveH - block);
+      var mid = lay.waveTop + slack / 2 + 36 + ampPx;
+      return { ampPx: ampPx, mid: mid };
+    }
+
+    function yOf(d, geom) {
+      return geom.mid - (d / AMP_FULL) * geom.ampPx;
+    }
+
+    function fit() {
+      var rect = canvas.getBoundingClientRect();
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cssW = Math.max(300, Math.floor(rect.width));
+      cssH = Math.max(280, Math.floor(rect.height));
+      var bw = Math.floor(cssW * dpr);
+      var bh = Math.floor(cssH * dpr);
+      if (canvas.width !== bw || canvas.height !== bh) {
+        canvas.width = bw;
+        canvas.height = bh;
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function drawBg() {
+      var g = ctx.createLinearGradient(0, 0, 0, cssH);
+      g.addColorStop(0, "#07111e");
+      g.addColorStop(1, "#0c1a2c");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, cssW, cssH);
+    }
+
+    function drawArrowLabel(x1, y1, x2, y2, text, color) {
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 2;
+      var ang = Math.atan2(y2 - y1, x2 - x1);
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - 9 * Math.cos(ang - 0.4), y2 - 9 * Math.sin(ang - 0.4));
+      ctx.lineTo(x2 - 9 * Math.cos(ang + 0.4), y2 - 9 * Math.sin(ang + 0.4));
+      ctx.closePath();
+      ctx.fill();
+      ctx.font = "700 13px " + FONT;
+      ctx.fillText(text, x2 + 6, y2 + 4);
+    }
+
+    function drawTrans(lay) {
+      var geom = waveGeom(lay);
+      var mid = geom.mid;
+      var samples = [];
+      var i;
+      for (i = 0; i <= 120; i++) {
+        var x = (i / 120) * L;
+        samples.push({ x: x, d: disp(x, state.t), px: xToPx(x, lay), py: 0 });
+        samples[i].py = yOf(samples[i].d, geom);
+      }
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(148,163,184,0.45)";
+      ctx.setLineDash([5, 6]);
+      ctx.lineWidth = 1.25;
+      ctx.beginPath();
+      ctx.moveTo(lay.padL, mid);
+      ctx.lineTo(cssW - lay.padR, mid);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      if (state.step >= 2) {
+        ctx.font = "600 12px " + FONT;
+        ctx.fillStyle = "#94a3b8";
+        ctx.textAlign = "right";
+        ctx.fillText("つり合いの位置", cssW - lay.padR, mid - 8);
+        ctx.textAlign = "left";
+      }
+
+      var watch = samples[Math.round(120 * WATCH_X / L)];
+      var yMax = yOf(state.A, geom);
+      var yMin = yOf(-state.A, geom);
+
+      if (state.step >= 1) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(251,191,36,0.55)";
+        ctx.setLineDash([3, 4]);
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(watch.px, yMax);
+        ctx.lineTo(watch.px, yMin);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      if (trail.length > 1 && state.step >= 1) {
+        for (i = 0; i < trail.length; i++) {
+          var a = (i + 1) / trail.length;
+          ctx.fillStyle = "rgba(251,191,36," + (0.15 + 0.75 * a) + ")";
+          ctx.beginPath();
+          ctx.arc(trail[i].px, trail[i].py, 3.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(samples[0].px, samples[0].py);
+      for (i = 1; i < samples.length; i++) ctx.lineTo(samples[i].px, samples[i].py);
+      ctx.strokeStyle = "rgba(14,116,144,0.95)";
+      ctx.lineWidth = 8;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.stroke();
+      ctx.strokeStyle = "#7dd3fc";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      var hand = samples[0];
+      ctx.fillStyle = "#334155";
+      roundRect(hand.px - 28, mid - 48, 16, 96, 4);
+      ctx.fill();
+      ctx.strokeStyle = "#fb7185";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(hand.px - 20, mid);
+      ctx.lineTo(hand.px, hand.py);
+      ctx.stroke();
+      ctx.fillStyle = "#fb7185";
+      ctx.beginPath();
+      ctx.arc(hand.px, hand.py, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      for (i = 0; i < samples.length; i += 5) {
+        var p = samples[i];
+        ctx.beginPath();
+        ctx.fillStyle = "#e0f2fe";
+        ctx.arc(p.px, p.py, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = "#0369a1";
+        ctx.stroke();
+      }
+
+      ctx.beginPath();
+      ctx.fillStyle = "#fbbf24";
+      ctx.arc(watch.px, watch.py, 9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#fff7ed";
+      ctx.stroke();
+
+      if (state.step >= 1) {
+        ctx.strokeStyle = "rgba(255,255,255,0.8)";
+        ctx.setLineDash([2, 3]);
+        ctx.lineWidth = 1.25;
+        ctx.beginPath();
+        ctx.moveTo(watch.px, mid);
+        ctx.lineTo(watch.px, watch.py);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      if (state.step === 1) {
+        drawArrowLabel(watch.px + 18, yMin - 4, watch.px + 18, yMax + 8, "", "#fbbf24");
+        tag(watch.px + 78, mid - 14, "上下に振動", "#0b1220", "#fbbf24");
+      }
+
+      ctx.font = "700 13px " + FONT;
+      ctx.fillStyle = "#7dd3fc";
+      var dirX = cssW - lay.padR - 132;
+      drawArrowLabel(dirX, 18, dirX + 78, 18, "進行", "#7dd3fc");
+
+      if (state.step >= 1) tag(hand.px - 8, mid + 56, "波源", "#0b1220", "#fb7185");
+      var nameY = yOf(AMP_FULL, geom) - 30;
+      if (state.step === 0) tag(watch.px, nameY, "この粒", "#0b1220", "#fbbf24");
+      if (state.step === 1) tag(watch.px, nameY, "媒質の粒", "#0b1220", "#fbbf24");
+
+      if (isPulse()) {
+        var pulse = pulseInfo(state.t);
+        if (pulse.active && pulse.xc > -8 && pulse.xc < L + 8) {
+          var peak = yOf(disp(pulse.xc, state.t), geom);
+          tag(xToPx(clamp(pulse.xc, 10, L - 10), lay), peak - 36, "波の形", "#0b1220", "#38bdf8");
+        } else if (!pulse.active) {
+          tag(cssW * 0.55, mid - 70, "粒は元の高さに戻った", "#0b1220", "#fde68a");
+        }
+      }
+
+      if (!isPulse() && state.step >= 2) {
+        var crests = xsFor(0.25, state.t).filter(function (x) { return x > 8 && x < L - 8; });
+        var troughs = xsFor(-0.25, state.t).filter(function (x) { return x > 8 && x < L - 8; });
+        var pairA = crests.length ? crests[0] : L * 0.35;
+        var pairB = crests.length > 1 ? crests[1] : pairA + state.lambda;
+        var best = 1e9;
+        for (i = 0; i < crests.length - 1; i++) {
+          var midX = (crests[i] + crests[i + 1]) / 2;
+          var dd = Math.abs(midX - L * 0.52);
+          if (dd < best) { best = dd; pairA = crests[i]; pairB = crests[i + 1]; }
+        }
+        var crest = pairB;
+        var trough = nearest(troughs, (pairA + pairB) / 2);
+        var cpx = xToPx(crest, lay);
+        var tpx = xToPx(trough, lay);
+        var yPeak = yOf(state.A, geom);
+        var yTrough = yOf(-state.A, geom);
+        tag(cpx, yPeak - 32, "山", "#0b1220", "#7dd3fc");
+        tag(tpx - 42, yTrough - 16, "谷", "#f8fafc", "#1e293b");
+
+        var ay1 = mid;
+        var ay2 = yPeak;
+        ctx.strokeStyle = "#fde68a";
+        ctx.fillStyle = "#fde68a";
+        ctx.lineWidth = 1.75;
+        ctx.beginPath();
+        ctx.moveTo(cpx + 16, ay1);
+        ctx.lineTo(cpx + 16, ay2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cpx + 16, ay2);
+        ctx.lineTo(cpx + 11, ay2 + 8);
+        ctx.lineTo(cpx + 21, ay2 + 8);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(cpx + 16, ay1);
+        ctx.lineTo(cpx + 11, ay1 - 8);
+        ctx.lineTo(cpx + 21, ay1 - 8);
+        ctx.fill();
+        tag(cpx + 56, (ay1 + ay2) / 2 - 13, "振幅 A", "#0b1220", "#fde68a");
+
+        if (state.step >= 3 && crests.length >= 2) {
+          var lamText = state.step >= 5 ? "λ（T 秒で進む）" : "波長 λ";
+          dimH(xToPx(pairA, lay), xToPx(pairB, lay), lay.waveBot - 14, lamText, state.step >= 5 ? "#fde68a" : "#38bdf8");
+        }
+
+        if (state.step >= 5 && crests.length >= 2) {
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = "#fde68a";
+          ctx.beginPath();
+          ctx.arc(xToPx(pairA, lay), yPeak, 7, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.fillStyle = "#fde68a";
+          ctx.beginPath();
+          ctx.arc(xToPx(pairB, lay), yPeak, 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      if (showGraph() && !isLong()) drawYT(lay, geom);
+      if (!state.playing) tag(cssW / 2, 4, "停止中", "#0b1220", "#e2e8f0");
+      ctx.font = "700 13px " + FONT;
+      ctx.fillStyle = "#cbd5e1";
+      ctx.fillText(state.step === 0 ? "ひと振りの波" : "横波", 16, 22);
+    }
+
+    function drawYT(lay) {
+      var left = lay.padL;
+      var right = cssW - lay.padR;
+      var top = lay.graphTop + 16;
+      var bot = cssH - 16;
+      roundRect(10, lay.graphTop + 4, cssW - 20, cssH - lay.graphTop - 10, 10);
+      ctx.fillStyle = "rgba(2,6,23,0.72)";
+      ctx.fill();
+
+      var windowSec = Math.min(8, Math.max(4, 2.3 / state.f));
+      var t1 = state.t;
+      var t0 = t1 - windowSec;
+      var mid = (top + bot) / 2;
+      var amp = (bot - top) * 0.34;
+      function X(tau) { return left + ((tau - t0) / windowSec) * (right - left); }
+      function Y(d) { return mid - (d / AMP_FULL) * amp; }
+
+      ctx.strokeStyle = "rgba(148,163,184,0.4)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(left, mid);
+      ctx.lineTo(right, mid);
+      ctx.moveTo(left, top + 8);
+      ctx.lineTo(left, bot - 8);
+      ctx.stroke();
+
+      ctx.beginPath();
+      var n = 160;
+      for (var i = 0; i <= n; i++) {
+        var tau = t0 + (windowSec * i) / n;
+        var py = Y(sineDisp(WATCH_X, tau));
+        var px = X(tau);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.strokeStyle = "#fbbf24";
+      ctx.lineWidth = 2.25;
+      ctx.stroke();
+
+      var nowY = Y(sineDisp(WATCH_X, state.t));
+      ctx.fillStyle = "#fbbf24";
+      ctx.beginPath();
+      ctx.arc(X(state.t), nowY, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      var crests = [];
+      var n0 = Math.floor(state.f * t0 - WATCH_X / state.lambda - 1);
+      var n1 = Math.ceil(state.f * t1 - WATCH_X / state.lambda + 1);
+      var nIdx;
+      for (nIdx = n0; nIdx <= n1; nIdx++) {
+        var tauC = (0.25 + nIdx + WATCH_X / state.lambda) / state.f;
+        if (tauC >= t0 + 0.05 && tauC <= t1 - 0.02) crests.push(tauC);
+      }
+      if (crests.length >= 2) {
+        var c1 = crests[crests.length - 2];
+        var c2 = crests[crests.length - 1];
+        dimH(X(c1), X(c2), bot - 6, "周期 T", "#fde68a");
+        ctx.strokeStyle = "rgba(253,230,138,0.45)";
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(X(c1), Y(state.A));
+        ctx.lineTo(X(c1), bot - 18);
+        ctx.moveTo(X(c2), Y(state.A));
+        ctx.lineTo(X(c2), bot - 18);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      ctx.font = "700 13px " + FONT;
+      ctx.fillStyle = "#fde68a";
+      ctx.fillText("黄色い粒の変位（横軸：時間）", left, top + 2);
+    }
+
+    function drawLong(lay) {
+      var geom = waveGeom(lay);
+      var mid = geom.mid;
+      var n = 20;
+      var spacingPx = xToPx(L / n, lay) - xToPx(0, lay);
+      var ampPx = Math.min(spacingPx * 0.42, 26);
+      var coils = [];
+      var i;
+      for (i = 0; i < n; i++) {
+        var x = ((i + 0.5) / n) * L;
+        var d = sineDisp(x, state.t);
+        var rest = xToPx(x, lay);
+        coils.push({ x: x, d: d, rest: rest, px: rest + (d / AMP_FULL) * ampPx });
+      }
+
+      ctx.strokeStyle = "rgba(148,163,184,0.4)";
+      ctx.setLineDash([5, 6]);
+      ctx.lineWidth = 1.25;
+      ctx.beginPath();
+      ctx.moveTo(lay.padL, mid);
+      ctx.lineTo(cssW - lay.padR, mid);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      var dense = xsFor(0, state.t).filter(function (x) { return x > 4 && x < L - 4; });
+      var rare = xsFor(0.5, state.t).filter(function (x) { return x > 4 && x < L - 4; });
+      function glow(xs, color) {
+        ctx.fillStyle = color;
+        for (var k = 0; k < xs.length; k++) {
+          ctx.beginPath();
+          ctx.ellipse(xToPx(xs[k], lay), mid, 34, 32, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      glow(dense, "rgba(251,146,60,0.16)");
+      glow(rare, "rgba(56,189,248,0.12)");
+
+      var watchI = 0;
+      var watchD = 1e9;
+      for (i = 0; i < coils.length; i++) {
+        var dd = Math.abs(coils[i].x - WATCH_X);
+        if (dd < watchD) { watchD = dd; watchI = i; }
+      }
+
+      for (i = 0; i < coils.length; i++) {
+        var c = coils[i];
+        var prev = coils[Math.max(0, i - 1)];
+        var next = coils[Math.min(n - 1, i + 1)];
+        var gap = (next.px - prev.px) / Math.max(1, (next === prev ? 1 : (i === 0 || i === n - 1 ? 1 : 2)));
+        var ratio = gap / spacingPx;
+        var col = ratio < 0.9 ? "#fb923c" : (ratio > 1.1 ? "#7dd3fc" : "#e2e8f0");
+        if (i === watchI) col = "#fbbf24";
+        var hh = i === watchI ? 23 : 18;
+        ctx.strokeStyle = col;
+        ctx.lineWidth = i === watchI ? 5 : 3.5;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(c.px, mid - hh);
+        ctx.lineTo(c.px, mid + hh);
+        ctx.stroke();
+        ctx.fillStyle = col;
+        ctx.beginPath();
+        ctx.arc(c.px, mid, i === watchI ? 5 : 3.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      var wch = coils[watchI];
+      ctx.strokeStyle = "rgba(255,255,255,0.85)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(wch.rest, mid + 28);
+      ctx.lineTo(wch.rest, mid + 40);
+      ctx.moveTo(wch.rest - (state.A / AMP_FULL) * ampPx, mid + 34);
+      ctx.lineTo(wch.rest + (state.A / AMP_FULL) * ampPx, mid + 34);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(wch.rest, mid + 34);
+      ctx.lineTo(wch.px, mid + 34);
+      ctx.stroke();
+      tag(wch.px, mid - 70, "この粒", "#0b1220", "#fbbf24");
+      tag(wch.rest, mid + 46, "振動", "#0b1220", "#fde68a");
+
+      if (dense.length) tag(xToPx(nearest(dense, L * 0.78), lay), mid - 70, "密", "#0b1220", "#fb923c");
+      if (rare.length) tag(xToPx(nearest(rare, L * 0.22), lay), mid - 70, "疎", "#0b1220", "#38bdf8");
+
+      if (dense.length >= 2) {
+        var pairA = dense[0];
+        var pairB = dense[1];
+        var best = 1e9;
+        for (i = 0; i < dense.length - 1; i++) {
+          var mx = (dense[i] + dense[i + 1]) / 2;
+          var dist = Math.abs(mx - L * 0.55);
+          if (dist < best) { best = dist; pairA = dense[i]; pairB = dense[i + 1]; }
+        }
+        dimH(xToPx(pairA, lay), xToPx(pairB, lay), lay.waveBot - 14, "波長 λ", "#fb923c");
+      }
+
+      var src = coils[0];
+      ctx.fillStyle = "#334155";
+      roundRect(src.rest - 36, mid - 40, 14, 80, 4);
+      ctx.fill();
+      tag(src.rest - 18, mid + 58, "波源", "#0b1220", "#fb7185");
+
+      ctx.font = "700 13px " + FONT;
+      ctx.fillStyle = "#7dd3fc";
+      drawArrowLabel(cssW - lay.padR - 132, 18, cssW - lay.padR - 54, 18, "進行", "#7dd3fc");
+
+      drawXi(lay);
+      if (!state.playing) tag(cssW / 2, 4, "停止中", "#0b1220", "#e2e8f0");
+      ctx.font = "700 13px " + FONT;
+      ctx.fillStyle = "#cbd5e1";
+      ctx.fillText("縦波", 16, 22);
+
+      if (trail.length > 1) {
+        ctx.fillStyle = "rgba(251,191,36,0.8)";
+        for (i = 0; i < trail.length; i++) {
+          ctx.globalAlpha = 0.15 + 0.8 * (i / trail.length);
+          ctx.beginPath();
+          ctx.arc(trail[i].px, mid, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    function drawXi(lay) {
+      var left = lay.padL;
+      var right = cssW - lay.padR;
+      var top = lay.graphTop + 22;
+      var bot = cssH - 18;
+      roundRect(10, lay.graphTop + 4, cssW - 20, cssH - lay.graphTop - 10, 10);
+      ctx.fillStyle = "rgba(2,6,23,0.72)";
+      ctx.fill();
+      var mid = (top + bot) / 2;
+      var amp = (bot - top) * 0.32;
+      function X(x) { return left + (x / L) * (right - left); }
+      function Y(d) { return mid - (d / AMP_FULL) * amp; }
+
+      ctx.strokeStyle = "rgba(148,163,184,0.4)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(left, mid);
+      ctx.lineTo(right, mid);
+      ctx.stroke();
+
+      ctx.beginPath();
+      for (var i = 0; i <= 160; i++) {
+        var x = (i / 160) * L;
+        var px = X(x);
+        var py = Y(sineDisp(x, state.t));
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.strokeStyle = "#7dd3fc";
+      ctx.lineWidth = 2.25;
+      ctx.stroke();
+
+      var dense = xsFor(0, state.t);
+      var rare = xsFor(0.5, state.t);
+      var k;
+      ctx.font = "700 12px " + FONT;
+      for (k = 0; k < dense.length; k++) {
+        if (dense[k] < 0 || dense[k] > L) continue;
+        ctx.fillStyle = "#fb923c";
+        ctx.beginPath();
+        ctx.arc(X(dense[k]), mid, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      for (k = 0; k < rare.length; k++) {
+        if (rare[k] < 0 || rare[k] > L) continue;
+        ctx.fillStyle = "#38bdf8";
+        ctx.beginPath();
+        ctx.arc(X(rare[k]), mid, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = "#fde68a";
+      ctx.font = "700 13px " + FONT;
+      ctx.fillText("前後のずれを上下に描く（上 = 右向き）", left, top - 2);
+      ctx.font = "600 12px " + FONT;
+      ctx.fillStyle = "#fb923c";
+      ctx.fillText("● 密", right - 88, top - 2);
+    }
+
+    function rememberTrail(px, py) {
+      var last = trail.length ? trail[trail.length - 1] : null;
+      if (last && Math.abs(last.t - state.t) < 0.016) return;
+      trail.push({ px: px, py: py, t: state.t });
+      var horizon = isPulse() ? 2.2 : Math.min(1.6, 0.85 / state.f);
+      while (trail.length && state.t - trail[0].t > horizon) trail.shift();
+    }
+
+    function draw() {
+      fit();
+      if (cssW < 20 || cssH < 20) return;
+      ctx.clearRect(0, 0, cssW, cssH);
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      drawBg();
+      var lay = layout();
+      if (isLong()) {
+        var n = 20;
+        var spacingPx = xToPx(L / n, lay) - xToPx(0, lay);
+        var ampPx = Math.min(spacingPx * 0.42, 26);
+        var x = WATCH_X;
+        var d = sineDisp(x, state.t);
+        var rest = xToPx(x, lay);
+        rememberTrail(rest + (d / AMP_FULL) * ampPx, waveGeom(lay).mid);
+        drawLong(lay);
+      } else {
+        var geom = waveGeom(lay);
+        var dT = disp(WATCH_X, state.t);
+        rememberTrail(xToPx(WATCH_X, lay), yOf(dT, geom));
+        drawTrans(lay);
+      }
+      updateUi();
+    }
+
+    function numText() {
+      var T = 1 / state.f;
+      var v = state.f * state.lambda;
+      return {
+        A: fmt(state.A, 1) + " cm",
+        L: fmt(state.lambda, 0) + " cm",
+        T: fmt(T, 2) + " s",
+        f: fmt(state.f, 2) + " Hz",
+        v: fmt(v, 1) + " cm/s",
+        vMs: fmt(v / 100, 2) + " m/s",
+        Traw: T,
+        vraw: v
+      };
+    }
+
+    function updateUi() {
+      var sig = [
+        state.step, state.A, state.lambda, state.f, state.waveType,
+        state.playing ? 1 : 0, state.slow ? 1 : 0
+      ].join("|");
+      if (sig === uiSig) return;
+      uiSig = sig;
+      var s = STEPS[state.step];
+      var q = numText();
+      document.getElementById("stepTitle").textContent = s.title;
+      document.getElementById("ask").textContent = s.ask;
+      document.getElementById("teacher").textContent = s.note;
+      stepBtns.forEach(function (b, i) {
+        var on = i === state.step;
+        b.classList.toggle("is-active", on);
+        b.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      if (stepBtns[state.step].scrollIntoView) {
+        stepBtns[state.step].scrollIntoView({ inline: "nearest", block: "nearest" });
+      }
+
+      document.getElementById("ampBlock").hidden = state.step < 2;
+      document.getElementById("lamBlock").hidden = state.step < 3;
+      document.getElementById("freqBlock").hidden = state.step < 4;
+      document.getElementById("paramGrid").hidden = state.step < 2;
+      document.getElementById("typeRow").hidden = state.step < 7;
+      document.getElementById("cardA").hidden = state.step < 2;
+      document.getElementById("cardL").hidden = state.step < 3;
+      document.getElementById("cardT").hidden = state.step < 4;
+      document.getElementById("cardF").hidden = state.step < 4;
+      document.getElementById("cardV").hidden = state.step < 5;
+      document.getElementById("readoutGrid").hidden = state.step < 2;
+
+      document.getElementById("ampVal").textContent = q.A;
+      document.getElementById("lamVal").textContent = q.L;
+      document.getElementById("freqVal").textContent = q.f;
+      document.getElementById("outA").textContent = q.A;
+      document.getElementById("outL").textContent = q.L;
+      document.getElementById("outT").textContent = q.T;
+      document.getElementById("outF").textContent = q.f;
+      document.getElementById("outV").textContent = q.v;
+
+      var playBtn = document.getElementById("btnPlay");
+      playBtn.textContent = state.playing ? "一時停止" : "再生";
+      playBtn.classList.toggle("is-active", state.playing);
+      document.getElementById("btnSlow").classList.toggle("is-active", state.slow);
+      document.getElementById("btnPrev").disabled = state.step === 0;
+      var nextBtn = document.getElementById("btnNext");
+      nextBtn.disabled = state.step === STEPS.length - 1;
+      nextBtn.textContent = state.step === STEPS.length - 1 ? "最後の場面" : "次へ · " + s.next;
+      document.getElementById("btnTrans").classList.toggle("is-active", state.waveType === "trans");
+      document.getElementById("btnLong").classList.toggle("is-active", state.waveType === "long");
+
+      var formula = "";
+      if (state.step === 0) {
+        formula = "式はまだ使わない。形の進み方と、黄色い粒の動きだけを見る。";
+      } else if (state.step === 1) {
+        formula = "媒質はその場で振動する。振動の向きと進行の向きが垂直な波を、横波という。";
+      } else if (state.step === 2) {
+        formula = "振幅 A = " + q.A + "　（つり合いの位置からの最大のずれ）";
+      } else if (state.step === 3) {
+        formula = "波長 λ = " + q.L + "　（となり合う山と山の距離）";
+      } else if (state.step === 4) {
+        formula = "T = 1/f = " + q.T + "　　f = " + q.f;
+      } else {
+        formula = "v = f × λ = " + fmt(state.f, 2) + " × " + fmt(state.lambda, 0) +
+          " = " + q.v + "（= " + q.vMs + "）　　v = λ/T = " +
+          fmt(state.lambda, 0) + " / " + fmt(q.Traw, 2) + " = " + q.v;
+        if (state.step >= 7) {
+          formula += "　　y = " + fmt(state.A, 1) + " sin 2π ( t / " + fmt(q.Traw, 2) +
+            " − x / " + fmt(state.lambda, 0) + " )　［cm, s］";
+        }
+      }
+      document.getElementById("formula").textContent = formula;
+      canvas.setAttribute("aria-label", s.title + "。" + s.ask);
+    }
+
+    function setStep(i) {
+      var next = clamp(i, 0, STEPS.length - 1);
+      if (next === state.step) return;
+      if (next === 0) state.t = 0;
+      state.step = next;
+      trail = [];
+      uiSig = "";
+      updateUi();
+    }
+
+    function restartTime() {
+      state.t = 0;
+      trail = [];
+      state.lastTs = 0;
+    }
+
+    document.getElementById("btnPlay").addEventListener("click", function () {
+      state.playing = !state.playing;
+      state.lastTs = 0;
+      uiSig = "";
+    });
+    document.getElementById("btnSlow").addEventListener("click", function () {
+      state.slow = !state.slow;
+      uiSig = "";
+    });
+    document.getElementById("btnFrame").addEventListener("click", function () {
+      state.playing = false;
+      state.t += isPulse() ? 0.08 : (1 / state.f) / 24;
+      uiSig = "";
+    });
+    document.getElementById("btnReplay").addEventListener("click", restartTime);
+    document.getElementById("btnPrev").addEventListener("click", function () { setStep(state.step - 1); });
+    document.getElementById("btnNext").addEventListener("click", function () { setStep(state.step + 1); });
+    document.getElementById("btnTrans").addEventListener("click", function () {
+      state.waveType = "trans";
+      trail = [];
+      uiSig = "";
+    });
+    document.getElementById("btnLong").addEventListener("click", function () {
+      state.waveType = "long";
+      trail = [];
+      uiSig = "";
+    });
+
+    function bindSlider(id, key, parse) {
+      document.getElementById(id).addEventListener("input", function (e) {
+        state[key] = parse(e.target.value);
+        uiSig = "";
+      });
+    }
+    bindSlider("ampSlider", "A", parseFloat);
+    bindSlider("lamSlider", "lambda", parseFloat);
+    bindSlider("freqSlider", "f", parseFloat);
+
+    document.addEventListener("keydown", function (e) {
+      var tagName = (e.target && e.target.tagName) || "";
+      if (tagName === "INPUT" || tagName === "TEXTAREA") return;
+      if (e.code === "Space") {
+        if (tagName === "BUTTON") return;
+        e.preventDefault();
+        state.playing = !state.playing;
+        state.lastTs = 0;
+        uiSig = "";
+      } else if (e.code === "ArrowRight" && !e.repeat) {
+        e.preventDefault();
+        setStep(state.step + 1);
+      } else if (e.code === "ArrowLeft" && !e.repeat) {
+        e.preventDefault();
+        setStep(state.step - 1);
+      }
+    });
+
+    window.addEventListener("resize", function () { state.lastTs = 0; });
+
+    updateUi();
+    requestAnimationFrame(function frame(ts) {
+      if (document.hidden) {
+        state.lastTs = 0;
+        requestAnimationFrame(frame);
+        return;
+      }
+      if (!state.lastTs) state.lastTs = ts;
+      var dt = Math.min(0.05, (ts - state.lastTs) / 1000);
+      state.lastTs = ts;
+      if (state.playing) state.t += dt * (state.slow ? 0.35 : 1);
+      draw();
+      requestAnimationFrame(frame);
+    });
+  })();
+  </script>
 </body>
 </html>
