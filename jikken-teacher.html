@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>教員用　蛍光増白剤の抽出</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&family=Noto+Serif+JP:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1c1916;
+      --muted: #5e584e;
+      --accent: #1e3a5f;
+      --line: #d9d1c3;
+      --paper: #fffdf8;
+      --wash: #f4f0e7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #e7e1d6;
+      color: var(--ink);
+      font-family: "Noto Serif JP", "Yu Mincho", "Hiragino Mincho ProN", serif;
+      font-size: 16px;
+      line-height: 1.8;
+    }
+    .banner {
+      background: var(--accent);
+      color: #fff;
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      padding: 14px 20px;
+    }
+    .banner strong { display: block; letter-spacing: 0.08em; }
+    .banner span { display: block; font-size: 0.85rem; opacity: 0.9; }
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      padding: 10px 16px;
+      background: #efeae1;
+      border-bottom: 1px solid var(--line);
+    }
+    button {
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #fff;
+      background: var(--accent);
+      border: 0;
+      border-radius: 4px;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+    button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+    .sheet {
+      width: min(800px, calc(100% - 24px));
+      margin: 24px auto 48px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      padding: 36px 42px 52px;
+    }
+    h1 {
+      margin: 0 0 0.4em;
+      font-size: 1.45rem;
+      font-weight: 600;
+      color: var(--accent);
+      line-height: 1.45;
+    }
+    h2 {
+      margin: 1.5em 0 0.4em;
+      padding-top: 0.4em;
+      border-top: 2px solid var(--accent);
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      font-size: 1.02rem;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+    }
+    p { margin: 0.45em 0; }
+    ol, ul { margin: 0.35em 0 0.6em; padding-left: 1.35em; }
+    li { margin: 0.35em 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.5em 0 0.8em;
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      font-size: 0.92rem;
+    }
+    th, td {
+      border: 1px solid #cfc6b8;
+      padding: 7px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: var(--wash); color: var(--accent); }
+    .calc {
+      margin: 0.4em 0 0.7em;
+      padding: 10px 14px;
+      background: var(--wash);
+      border: 1px solid var(--line);
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      line-height: 1.75;
+    }
+    code {
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+    }
+    @media (max-width: 640px) {
+      .sheet { padding: 22px 16px 32px; }
+    }
+    @page { size: A4; margin: 14mm 15mm; }
+
+    @media print {
+      body { background: #fff; font-size: 10.5pt; }
+      .toolbar { display: none; }
+      .sheet { width: auto; margin: 0; border: 0; padding: 0; }
+      h2 { break-after: avoid; page-break-after: avoid; }
+      h2, table, .calc, li { break-inside: avoid; page-break-inside: avoid; }
+      .banner, th, .calc {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="banner">
+    <strong>教員用　生徒には配らない</strong>
+    <span>生徒用の印刷物は、同じフォルダの jikken.html です。</span>
+  </header>
+  <div class="toolbar">
+    <button type="button" onclick="window.print()">印刷する</button>
+  </div>
+
+  <article class="sheet">
+    <h1>蛍光増白剤の抽出　原稿で直したところと解答</h1>
+    <p>実験のねらい、洗剤から取り出して紫外線で光らせること、光子のエネルギーを計算することは、原稿のまま残してある。直したのは、定義が計算と食い違う箇所と、操作しただけでは課題に答えられない箇所である。</p>
+
+    <h2>文と内容</h2>
+    <ol>
+      <li>原稿は、電子が原子核のまわりに分布していることを基底状態と呼んでいた。分布そのものは基底状態ではない。定常状態は決まったエネルギーをもつ状態で、最も低いものが基底状態、それより高いものが励起状態である。</li>
+      <li>原稿の目的は、光エネルギーが与えられて準位が変わると発光する、と書いていた。光を受け取ったときは吸収である。発光は、高い状態から低い状態へ戻るときに起きる。</li>
+      <li>原稿は、基底状態にある電子を不安定な電子と書いていた。基底状態は、その電子がとりうる状態のうち安定な側である。励起状態のほうがエネルギーが高く、低い状態へ戻りやすい。</li>
+      <li>「光子（光子量）」は誤記である。括弧内は光量子が相当する。</li>
+      <li>原稿の式(2)は、吸収でも放出でも同じ hν だった。原子の一つの準位間を往復するモデルではそう書くことがある。蛍光増白剤は、およそ 300〜400 nm の紫外線を吸収し、それよりエネルギーの小さい青い光（およそ 420〜470 nm）を出す。光を出す前に一部が熱になる。式を吸収の(2)と放出の(3)に分け、図1にその矢印を描いた。課題Aと課題Bを別に計算できるのは、この差があるからである。</li>
+      <li>青味付け、黄ばみ、青い光を補って白く見せる説明は、実験の原理として本文に残した。特許の年、市場の割合、商品の正式な化学名は、操作にも計算にも使わない。文も「木綿用蛍光増白剤はとして」の箇所で壊れていたので、本文には載せていない。</li>
+      <li>原稿は、エネルギーを得る要因に音も含めていた。この実験で電子の準位を上げるものとしては光を扱い、失われる側として熱を書いた。</li>
+    </ol>
+
+    <h2>操作</h2>
+    <ol>
+      <li>試薬の欄は無水エタノール、操作は消毒用エタノールだった。操作に合わせて消毒用エタノールにそろえた。水をほとんど含まないことは、この抽出の条件ではない。</li>
+      <li>粉末 30 g にエタノール 80 mL は濃く、コーヒーフィルターが詰まりやすい。5 g と 40 mL にした。光が弱いときだけ、洗剤を 10 g まで増やす。</li>
+      <li>操作④は「取り除くことができたら捨てる」という結果の文だった。溶け残りを除く操作に直し、フィルターは光るかを見てから片づけるようにした。蛍光増白剤は紙や綿に付きやすい。</li>
+      <li>原稿の観察は抽出液だけだった。エタノールだけ、粉末、フィルターも記録する。エタノールだけが弱く光ることがある。そのときは抽出液との明るさの差で判断する。</li>
+      <li>課題Bは放出された光子のエネルギーを問う。原稿の操作では、放出光の波長を決める手順がなかった。見た色から選ぶ表1を置いた。班によって選ぶ波長が違ってよい。</li>
+      <li>貼られた文の「部屋を暗くして」は、そのままでよい。ブラックライトを目に入れない注意も残した。エタノールの火気と廃液を足した。</li>
+    </ol>
+
+    <h2>準備で確認すること</h2>
+    <ul>
+      <li>洗剤の表示に蛍光増白剤が入っていること。無配合の製品では、ほぼ光らない。</li>
+      <li>ブラックライトは 365 nm 付近のもの。395 nm の安価な LED では、光が弱いことがある。課題Aの計算は 365 nm で行う。</li>
+      <li>部屋を暗くできること。火気がないこと。</li>
+      <li>課題Aの 365 nm は、吸収極大を測定した値ではない。ランプの波長とみなした計算である。蛍光増白剤の吸収は 300〜400 nm にあるので、エネルギーの大きさの見積もりとして使う。</li>
+    </ul>
+
+    <h2>観察の目安</h2>
+    <p>抽出液と粉末は、青白く光ることが多い。コーヒーフィルターが液より明るく光ることがある。エタノールだけでは、ほとんど光らない。光らないときは、蛍光剤無配合、部屋が明るい、紫外線が出ていない、洗剤が少なすぎる、の順に確認する。</p>
+
+    <h2>課題Aの解答</h2>
+    <p>波長をメートルに直す。</p>
+    <div class="calc">
+      365 nm = 365×10<sup>−9</sup> m = 3.65×10<sup>−7</sup> m<br>
+      E = hc / λ = 1.99×10<sup>−25</sup> / 3.65×10<sup>−7</sup> = 5.45×10<sup>−19</sup> J
+    </div>
+    <p>有効数字は 3 桁。参考として、1 eV = 1.60×10<sup>−19</sup> J とすると約 3.40 eV である。課題の答えは J でよい。</p>
+
+    <h2>課題Bの解答</h2>
+    <p>表1の波長ごとに、同じ定数で計算した値である。生徒には、自分の選んだ行だけを求めさせる。</p>
+    <table>
+      <thead>
+        <tr><th>見た色</th><th>波長</th><th>メートルに直す</th><th>E（放出）</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>紫</td><td>420 nm</td><td>4.20×10<sup>−7</sup> m</td><td>4.74×10<sup>−19</sup> J</td></tr>
+        <tr><td>青紫</td><td>440 nm</td><td>4.40×10<sup>−7</sup> m</td><td>4.52×10<sup>−19</sup> J</td></tr>
+        <tr><td>青</td><td>470 nm</td><td>4.70×10<sup>−7</sup> m</td><td>4.23×10<sup>−19</sup> J</td></tr>
+        <tr><td>水色</td><td>490 nm</td><td>4.90×10<sup>−7</sup> m</td><td>4.06×10<sup>−19</sup> J</td></tr>
+        <tr><td>緑</td><td>530 nm</td><td>5.30×10<sup>−7</sup> m</td><td>3.75×10<sup>−19</sup> J</td></tr>
+      </tbody>
+    </table>
+    <p>計算例（青紫を選んだ場合）</p>
+    <div class="calc">E = 1.99×10<sup>−25</sup> / 4.40×10<sup>−7</sup> = 4.52×10<sup>−19</sup> J</div>
+    <p>どれも課題Aの 5.45×10<sup>−19</sup> J より小さい。ここが原稿の式(2)との違いである。</p>
+
+    <h2>課題Cの解答</h2>
+    <p>光を出す直前の状態と基底状態との差は、放出される光子のエネルギーに対応する。Bの結果を使う。</p>
+    <p>AとBの差は、光になる前に失ったエネルギーである。分子の振動、つまり熱になったと考える。引き算なので、有効数字は 2 桁でみてよい。</p>
+    <table>
+      <thead>
+        <tr><th>選んだ色</th><th>A − B</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>紫（420 nm）</td><td>7.1×10<sup>−20</sup> J</td></tr>
+        <tr><td>青紫（440 nm）</td><td>9.3×10<sup>−20</sup> J</td></tr>
+        <tr><td>青（470 nm）</td><td>1.22×10<sup>−19</sup> J</td></tr>
+        <tr><td>水色（490 nm）</td><td>1.39×10<sup>−19</sup> J</td></tr>
+        <tr><td>緑（530 nm）</td><td>1.70×10<sup>−19</sup> J</td></tr>
+      </tbody>
+    </table>
+    <div class="calc">例：5.45×10<sup>−19</sup> − 4.52×10<sup>−19</sup> = 9.3×10<sup>−20</sup> J</div>
+    <p>差の分が、より強い光になって出る、という答えは合わない。放出のほうが小さい。</p>
+
+    <h2>課題Dの解答例</h2>
+    <ul>
+      <li>蛍光ペンのインク。紫外線や青い光を吸収し、黄、緑、ピンクなどの可視光を出す。</li>
+      <li>トニックウォーター。キニーネが紫外線を吸収し、青白く光る。</li>
+      <li>植物の葉。クロロフィルは、暗いところで赤い蛍光を出すことがある。</li>
+      <li>紙幣の一部に使われる蛍光インク。</li>
+    </ul>
+    <p>いずれも、吸収した光より波長の長い光を出す、という点では本実験と同じしくみで説明できる。名称と色が具体的に書いてあればよい。</p>
+
+    <h2>計算でつまずきやすい点</h2>
+    <ul>
+      <li>365 nm を 365 m のまま割る。答えが 10<sup>9</sup> 倍ずれる。</li>
+      <li>hc を 1.99×10<sup>−25</sup> ではなく 1.99×10<sup>25</sup> にする。</li>
+      <li>吸収と放出に同じ波長を使う。表2の波長を使っているかを見る。</li>
+      <li>図1の矢印の長さを、そのまま nm の比だと思う。図の説明に、比そのものではないと書いてある。</li>
+    </ul>
+  </article>
+</body>
+</html>

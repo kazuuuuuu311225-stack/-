@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>実験テキスト　蛍光増白剤の抽出</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&family=Noto+Serif+JP:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1c1916;
+      --muted: #5e584e;
+      --accent: #1e3a5f;
+      --line: #d9d1c3;
+      --paper: #fffdf8;
+      --wash: #f4f0e7;
+      --safety: #7a3e12;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #e7e1d6;
+      color: var(--ink);
+      font-family: "Noto Serif JP", "Yu Mincho", "Hiragino Mincho ProN", serif;
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 16px;
+      background: #efeae1;
+      border-bottom: 1px solid var(--line);
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+    }
+
+    button {
+      font: inherit;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #fff;
+      background: var(--accent);
+      border: 0;
+      border-radius: 4px;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--ink);
+      outline-offset: 2px;
+    }
+
+    .sheet {
+      width: min(800px, calc(100% - 24px));
+      margin: 24px auto 48px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      padding: 42px 46px 56px;
+    }
+
+    .kicker {
+      margin: 0;
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+    }
+
+    h1 {
+      margin: 6px 0 0;
+      font-size: 1.65rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      line-height: 1.4;
+      color: var(--accent);
+    }
+
+    .read {
+      margin: 4px 0 0;
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 28px;
+      margin: 18px 0 8px;
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      font-size: 0.92rem;
+    }
+
+    .blank {
+      display: inline-block;
+      min-width: 9.5em;
+      border-bottom: 1px solid var(--ink);
+      margin-left: 0.6em;
+      transform: translateY(-2px);
+    }
+
+    .blank.short { min-width: 4.5em; }
+
+    h2 {
+      margin: 1.55em 0 0.45em;
+      padding-top: 0.4em;
+      border-top: 2px solid var(--accent);
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+    }
+
+    h3 {
+      margin: 1.15em 0 0.3em;
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    p { margin: 0.5em 0; }
+
+    ol, ul { margin: 0.4em 0 0.6em; padding-left: 1.4em; }
+    li { margin: 0.28em 0; }
+    li ol { margin-top: 0.2em; }
+
+    .spec {
+      margin: 0.4em 0 0.8em;
+    }
+
+    .spec div {
+      display: grid;
+      grid-template-columns: 4.2em 1fr;
+      gap: 8px;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .spec dt {
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .spec dd { margin: 0; }
+
+    .safety {
+      margin: 0.8em 0;
+      padding: 10px 14px 10px 16px;
+      background: #fbf6ef;
+      border-left: 4px solid var(--safety);
+    }
+
+    .safety p:first-child {
+      margin-top: 0;
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      font-weight: 700;
+      color: var(--safety);
+    }
+
+    .safety ul { margin-bottom: 0; }
+
+    .formula {
+      position: relative;
+      margin: 0.7em 0;
+      padding: 10px 52px;
+      background: var(--wash);
+      border: 1px solid var(--line);
+      text-align: center;
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      line-height: 1.7;
+    }
+
+    .eqno {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+    }
+
+    figure {
+      margin: 0.8em 0 0.4em;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fbf9f4;
+      border: 1px solid var(--line);
+    }
+
+    figcaption {
+      margin-top: 6px;
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.4em 0 0.8em;
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      font-size: 0.92rem;
+    }
+
+    caption {
+      caption-side: top;
+      text-align: left;
+      font-weight: 700;
+      color: var(--accent);
+      padding-bottom: 6px;
+    }
+
+    th, td {
+      border: 1px solid #cfc6b8;
+      padding: 7px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--wash);
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    td.write { height: 2.7em; }
+
+    .const {
+      margin: 0.6em 0;
+      padding: 10px 14px;
+      background: var(--wash);
+      border: 1px solid var(--line);
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      line-height: 1.7;
+    }
+
+    .q { margin-top: 0.9em; }
+    .q-label {
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .lines span {
+      display: block;
+      height: 1.85em;
+      border-bottom: 1px solid #b7aa96;
+    }
+
+    @media (max-width: 640px) {
+      .sheet { padding: 22px 16px 32px; }
+      .meta { grid-template-columns: 1fr; }
+      .formula { padding: 10px 12px 28px; }
+      .eqno { top: auto; bottom: 6px; transform: none; }
+      .spec div { grid-template-columns: 1fr; gap: 0; }
+    }
+
+    @page { size: A4; margin: 14mm 15mm; }
+
+    @media print {
+      body { background: #fff; font-size: 10.5pt; line-height: 1.65; }
+      .toolbar { display: none; }
+      .sheet {
+        width: auto;
+        margin: 0;
+        border: 0;
+        padding: 0;
+      }
+      h2, h3 { break-after: avoid; page-break-after: avoid; }
+      h2, h3, figure, table, .safety, .q, .const, .lines {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .formula, .const, .safety, th, svg, .sheet {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button type="button" onclick="window.print()">印刷する</button>
+  </div>
+
+  <article class="sheet">
+    <p class="kicker">物理　実験テキスト</p>
+    <h1>1　蛍光増白剤の抽出</h1>
+    <p class="read">けいこうぞうはくざい</p>
+
+    <div class="meta">
+      <p>クラス<span class="blank"></span></p>
+      <p>班<span class="blank short"></span></p>
+      <p>氏名<span class="blank"></span></p>
+      <p>日付<span class="blank"></span></p>
+    </div>
+
+    <h2>目的</h2>
+    <p>原子や分子の中で、電子は定常状態にあるとき、決まった一つのエネルギーをもつ。その値は連続ではなく、とびとびである。光は、アインシュタインの光量子説のとおり、エネルギーをもった光子として吸収され、また放出される。電子が光子を吸収するとエネルギーの高い状態へ移り、低い状態へ戻るときに光を出す。</p>
+    <p>本実験では、粉末洗剤から蛍光増白剤を取り出し、紫外線を当てると光を出して光ることを確かめる。あわせて、照射した光子のエネルギーと、光として放出された光子のエネルギーを計算する。</p>
+
+    <h2>原理</h2>
+    <h3>1. 光エネルギーの吸収と放出</h3>
+    <p>原子核のまわりには電子がある。電子がどの軌道に入れるかは、その電子のエネルギーで決まる。最もエネルギーの低い定常状態を基底状態といい、それより高い定常状態を励起状態という。外側の軌道ほど、エネルギーは高い。</p>
+    <p>基底状態の電子が、二つの状態のエネルギー差に合うエネルギーを外から受け取ると、対応する励起状態へ移る。本実験で電子にエネルギーを渡すのは光である。</p>
+    <p>アインシュタインは、光を光子（光量子）という粒子の集まりとして扱った。振動数 ν［Hz］の光では、光子1個のエネルギーは式(1)で表される。これを光量子説という。</p>
+    <p class="formula">E = hν = hc / λ<span class="eqno">(1)</span></p>
+    <p>h はプランク定数、c は光の速さ、λ は波長である。波長が短いほど光子1個のエネルギーは大きく、長いほど小さい。式に入れる波長は、メートルに直す。</p>
+    <p>紫外線のようにエネルギーの大きい光子を吸収すると、電子は基底状態から励起状態へ上がる。この吸収は式(2)で表す。</p>
+    <p class="formula">E（吸収） = hc / λ（吸収）<span class="eqno">(2)</span></p>
+    <p>励起状態の電子は、より低い状態へ戻るときにエネルギーを外へ出す。蛍光増白剤では、光を出す前に、その一部を分子の振動、つまり熱として失う。光になるのは残った分だけなので、放出される光子のエネルギーは吸収した光子より小さい。放出は式(3)で表す。</p>
+    <p class="formula">E（放出） = hc / λ（放出）<span class="eqno">(3)</span></p>
+    <p>したがって λ（放出）は λ（吸収）より長く、E（吸収）は E（放出）より大きい。放出される光は目に見える色になる。この光を蛍光という。</p>
+
+    <figure>
+      <svg viewBox="0 0 720 300" role="img" aria-labelledby="figTitle figDesc">
+        <title id="figTitle">蛍光増白剤のエネルギー図</title>
+        <desc id="figDesc">基底状態から紫外線を吸収して高い状態へ上がり、一部を熱として失ったあと、青い光を出して低い状態へ戻る。蛍光の矢印は吸収の矢印より短い。</desc>
+        <line x1="64" y1="40" x2="64" y2="258" stroke="#1c1916" stroke-width="1.6"/>
+        <polygon points="64,30 58,44 70,44" fill="#1c1916"/>
+        <text x="76" y="28" fill="#1c1916" font-size="14" font-family="Noto Sans JP, Yu Gothic, sans-serif">エネルギー</text>
+
+        <line x1="118" y1="56" x2="470" y2="56" stroke="#1c1916" stroke-width="2"/>
+        <line x1="118" y1="124" x2="470" y2="124" stroke="#1c1916" stroke-width="2"/>
+        <line x1="118" y1="250" x2="470" y2="250" stroke="#1c1916" stroke-width="2"/>
+
+        <text x="482" y="60" fill="#1c1916" font-size="14" font-family="Noto Sans JP, Yu Gothic, sans-serif">吸収した直後</text>
+        <text x="482" y="128" fill="#1c1916" font-size="14" font-family="Noto Sans JP, Yu Gothic, sans-serif">光を出す直前</text>
+        <text x="482" y="254" fill="#1c1916" font-size="14" font-family="Noto Sans JP, Yu Gothic, sans-serif">基底状態</text>
+
+        <line x1="190" y1="242" x2="190" y2="70" stroke="#5b3a8c" stroke-width="2.4"/>
+        <polygon points="190,56 183,72 197,72" fill="#5b3a8c"/>
+        <text x="204" y="150" fill="#5b3a8c" font-size="14" font-family="Noto Sans JP, Yu Gothic, sans-serif">吸収</text>
+        <text x="204" y="170" fill="#5b3a8c" font-size="13" font-family="Noto Sans JP, Yu Gothic, sans-serif">紫外線</text>
+
+        <path d="M330 64c12 12 12 16 0 28c-12 12-12 16 0 28" fill="none" stroke="#9a3412" stroke-width="2.2"/>
+        <polygon points="330,124 324,112 336,112" fill="#9a3412"/>
+        <text x="346" y="100" fill="#9a3412" font-size="13" font-family="Noto Sans JP, Yu Gothic, sans-serif">熱として失う</text>
+
+        <line x1="430" y1="132" x2="430" y2="234" stroke="#1d4e89" stroke-width="2.4"/>
+        <polygon points="430,250 423,234 437,234" fill="#1d4e89"/>
+        <text x="444" y="186" fill="#1d4e89" font-size="14" font-family="Noto Sans JP, Yu Gothic, sans-serif">蛍光</text>
+        <text x="444" y="206" fill="#1d4e89" font-size="13" font-family="Noto Sans JP, Yu Gothic, sans-serif">青い可視光</text>
+      </svg>
+      <figcaption>図1　蛍光増白剤が紫外線を吸収してから、蛍光を出すまで。下向きの矢印は上向きの矢印より短い。矢印の長さは、放出のエネルギーのほうが小さいことを表す。数値の比そのものではない。</figcaption>
+    </figure>
+
+    <h3>2. 蛍光増白剤</h3>
+    <p>白い布が黄ばんで見えるのは、反射する光のうち青い成分が弱くなり、白さのバランスが崩れるからである。白さを戻す考え方は、次の三つに整理できる。</p>
+    <ol>
+      <li>黄ばみの原因になっている着色物を落とす。</li>
+      <li>黄色い光の反射を抑える物質を少し加え、黄ばみを目立たなくする。白地にわずかな青や紫を付ける青味付けは、この方法である。布そのものが別の白い物質に変わるわけではなく、見た目が白に近づく。</li>
+      <li>不足した青い光を、別の光として補う。蛍光増白剤はこの方法である。</li>
+    </ol>
+    <p>蛍光増白剤は、太陽光などに含まれる紫外線（およそ 300〜400 nm）を吸収し、目に見える青い光（およそ 420〜470 nm）を放出する。白い布にこの物質が付いていると、弱くなっていた青い光が足され、より白く見える。</p>
+    <p>洗濯用の粉末洗剤には、繊維に残ってこの働きをする蛍光増白剤が入っているものがある。その一部はエタノールに溶け、粉末の多くは溶け残る。ろ過すると、液の側に取り出せる。</p>
+
+    <h2>実験</h2>
+    <p>蛍光増白剤の抽出と、蛍光色の観察</p>
+    <dl class="spec">
+      <div>
+        <dt>試料</dt>
+        <dd>蛍光増白剤入りの粉末洗剤</dd>
+      </div>
+      <div>
+        <dt>試薬</dt>
+        <dd>消毒用エタノール</dd>
+      </div>
+      <div>
+        <dt>器具</dt>
+        <dd>ブラックライト（波長は 365 nm とみなす）、コーヒーフィルター、250 mL ビーカー 2個、ガラス棒、はかり（なければ小さじ）</dd>
+      </div>
+    </dl>
+
+    <div class="safety">
+      <p>安全</p>
+      <ul>
+        <li>ブラックライトの光を目に直接入れない。人の顔に向けない。</li>
+        <li>エタノールは引火しやすい。火の近くで使わず、使い終わったら栓をする。</li>
+        <li>液が目に入ったら、すぐに多量の水で洗い、先生に知らせる。</li>
+        <li>廃液と使用後のフィルターは、先生の指示した場所へ出す。終わったら手を洗う。</li>
+      </ul>
+    </div>
+
+    <h3>操作</h3>
+    <ol>
+      <li>粉末洗剤 5 g をビーカーにとる。はかりがないときは、小さじ山盛り1杯を約 5 g とみなしてよい。</li>
+      <li>消毒用エタノールを 40 mL 加え、ガラス棒で1分ほど静かにかき混ぜる。十数秒置き、粉末を沈ませる。</li>
+      <li>もう一つのビーカーに、コーヒーフィルターを広げてのせる。</li>
+      <li>上澄みを静かにフィルターへ注ぎ、溶け残った粉末を除く。通りが悪くなったら、フィルターを替える。</li>
+      <li>比べるために、エタノールだけを入れたビーカーを用意する。光の原因がエタノールではないことを、この比較で確かめる。</li>
+      <li>部屋を暗くし、抽出した液、エタノールだけ、残った粉末、使ったコーヒーフィルターの四つにブラックライトを当てる。光ったかどうかと、光の色を結果の表に書く。光を目に直接入れない。</li>
+      <li>抽出液の色を表1と見比べ、最も近い波長を選ぶ。中間に見えたときは近いほうを選び、選んだ理由を表の下に書く。課題Bでは、この波長を使う。</li>
+    </ol>
+
+    <table>
+      <caption>表1　蛍光の色と波長の目安</caption>
+      <thead>
+        <tr><th>見た色</th><th>波長の目安</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>紫</td><td>420 nm</td></tr>
+        <tr><td>青紫</td><td>440 nm</td></tr>
+        <tr><td>青</td><td>470 nm</td></tr>
+        <tr><td>水色</td><td>490 nm</td></tr>
+        <tr><td>緑</td><td>530 nm</td></tr>
+      </tbody>
+    </table>
+
+    <h2>結果</h2>
+    <table>
+      <caption>表2　ブラックライトを当てたときの様子</caption>
+      <thead>
+        <tr>
+          <th>見たいもの</th>
+          <th>光ったか</th>
+          <th>色</th>
+          <th>選んだ波長</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>抽出した液</td><td class="write"></td><td class="write"></td><td class="write"></td></tr>
+        <tr><td>エタノールだけ</td><td class="write"></td><td class="write"></td><td>比較に使う</td></tr>
+        <tr><td>残った粉末</td><td class="write"></td><td class="write"></td><td></td></tr>
+        <tr><td>コーヒーフィルター</td><td class="write"></td><td class="write"></td><td></td></tr>
+      </tbody>
+    </table>
+    <p>波長を選んだ理由</p>
+    <div class="lines" aria-hidden="true"><span></span><span></span><span></span></div>
+
+    <h3>結果から書くこと</h3>
+    <div class="q">
+      <p>抽出液とエタノールだけの結果を比べ、光っている原因は何か。</p>
+      <div class="lines" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <div class="q">
+      <p>コーヒーフィルターは光ったか。蛍光増白剤が紙に残りやすいとすると、洗濯のあと布が白く見えることと、どう関係するか。</p>
+      <div class="lines" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+
+    <h2>課題</h2>
+    <div class="const">
+      <div>計算に使う値</div>
+      h = 6.63×10<sup>−34</sup> J·s　　c = 3.00×10<sup>8</sup> m/s　　hc = 1.99×10<sup>−25</sup> J·m
+      <br>1 nm = 1×10<sup>−9</sup> m　　有効数字は 3 桁
+    </div>
+
+    <div class="q">
+      <p><span class="q-label">A</span>　この実験のブラックライトを、波長 365 nm の光とみなす。式(1)を使い、照射した光子1個のエネルギーを J で求めよ。365 nm を m に直してから代入し、計算過程も書く。</p>
+      <div class="lines" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    </div>
+    <div class="q">
+      <p><span class="q-label">B</span>　表2で選んだ蛍光の波長を使い、放出された光子1個のエネルギーを J で求めよ。計算過程も書く。</p>
+      <div class="lines" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    </div>
+    <div class="q">
+      <p><span class="q-label">C</span>　光を出す直前の状態と、基底状態とのエネルギー差は、AとBのどちらの結果に対応するか。また A と B の差を計算し、光にならなかったエネルギーは何に変わったと考えられるか書け。</p>
+      <div class="lines" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    </div>
+    <div class="q">
+      <p><span class="q-label">D</span>　蛍光増白剤以外で、紫外線を当てると光る身のまわりのものを一つ調べ、名称と、光って見えた色を書け。その光り方は、本実験と同じしくみで説明できるか。</p>
+      <div class="lines" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+  </article>
+</body>
+</html>
